@@ -30,7 +30,7 @@ function getColor(d) {
 
 // the function that will determine the size of the marker based on the magnitude of the earthquake
 function getRadius(mag) {
-  return mag * 5;
+  return mag * 4;
 }
 
   // getting our geoJSON data
