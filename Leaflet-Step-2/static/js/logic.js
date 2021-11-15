@@ -4,6 +4,7 @@ var queryUrl = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_we
 var tectonicPlates = "https://raw.githubusercontent.com/fraxen/tectonicplates/master/GeoJSON/PB2002_boundaries.json";
 
 
+
 // the function that will determine the color of the marker based on the depth of the earthquake
 function getColor(d) {
   return d > 90 ? '#ff0000' :
@@ -19,69 +20,69 @@ function getRadius(mag) {
   return mag * 4;
 }
 
-// // Perform a GET request to the query URL/
-// d3.json(queryUrl).then(function(data) {
-//   // Once we get a response, send the data.features object to the createFeatures function.
-//   createFeatures(data.features);
-//   console.log("Json Data", data.features);
-// });
-
-
-
-// function createFeatures(earthquakeData) {
-
-//   // Define a function we want to run once for each feature in the features array
-//   // Give each feature a popup describing the magnitude and depth of the earthquake
-//   function onEachFeature(feature, layer) {
-//     layer.bindPopup(`<h3>Magnitude: ${feature.properties.mag}</h3><hr><p>Earthquake Depth: ${(feature.geometry.coordinates[2])}</p>`);
-//   }
-
-//   // Create a GeoJSON layer containing the features array on the earthquakeData object
-//   // Run the onEachFeature function once for each piece of data in the array
-//   var earthquakes = L.geoJSON(earthquakeData, {
-//     // styling the markers
-//     pointToLayer: function(feature, latlng) {
-//       return L.circleMarker(latlng, {
-//         radius: getRadius(feature.properties.mag),
-//         fillColor: getColor(feature.geometry.coordinates[2]),
-//         color: "#000",
-//         weight: 1,
-//         opacity: 1,
-//         fillOpacity: 0.8
-//       });
-//   },
-//     onEachFeature: onEachFeature
-//     }); 
-
- 
-//   // Sending our earthquakes layer to the createMap function
-//   createMap(earthquakes);
-// }
-
-// perform a data request to the tectonic plates data
-d3.json(tectonicPlates).then(function(data) {
+// Perform a GET request to the query URL/
+d3.json(queryUrl).then(function(data) {
   // Once we get a response, send the data.features object to the createFeatures function.
   createFeatures(data.features);
-  console.log("Tectonic Data", data.features);
+  console.log("Json Data", data.features);
 });
 
-function createFeatures(tectonicPlatesData) {
 
-  var tectonicPlates = L.geoJSON(tectonicPlatesData, {
+
+function createFeatures(earthquakeData) {
+
+  // Define a function we want to run once for each feature in the features array
+  // Give each feature a popup describing the magnitude and depth of the earthquake
+  function onEachFeature(feature, layer) {
+    layer.bindPopup(`<h3>Magnitude: ${feature.properties.mag}</h3><hr><p>Earthquake Depth: ${(feature.geometry.coordinates[2])}</p>`);
+  }
+
+  // Create a GeoJSON layer containing the features array on the earthquakeData object
+  // Run the onEachFeature function once for each piece of data in the array
+  var earthquakes = L.geoJSON(earthquakeData, {
     // styling the markers
-    color: "#f5bf42",
-    weight: 2
-  });
+    pointToLayer: function(feature, latlng) {
+      return L.circleMarker(latlng, {
+        radius: getRadius(feature.properties.mag),
+        fillColor: getColor(feature.geometry.coordinates[2]),
+        color: "#000",
+        weight: 1,
+        opacity: 1,
+        fillOpacity: 0.8
+      });
+  },
+    onEachFeature: onEachFeature
+    }); 
 
-  // sending our tectonic plates layer to the createMap function
-  createMap(tectonicPlates);
+ 
+  // Sending our earthquakes layer to the createMap function
+  createMap(earthquakes);
 }
 
+// // perform a data request to the tectonic plates data
+// d3.json(tectonicPlates).then(function(data) {
+//   // Once we get a response, send the data.features object to the createFeatures function.
+//   createFeatures(data.features);
+//   console.log("Tectonic Data", data.features);
+// });
+
+// function createFeatures(tectonicPlatesData) {
+
+//   var tectonicPlates = L.geoJSON(tectonicPlatesData, {
+//     // styling the markers
+//     color: "#f5bf42",
+//     weight: 2
+//   });
+
+//   // sending our tectonic plates layer to the createMap function
+//   createMap(tectonicPlates);
+// }
 
 
 
 
-function createMap(tectonicPlates) {
+
+function createMap(earthquakes) {
 
   // create the base layers
   var Esri_WorldImagery = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
@@ -107,9 +108,8 @@ function createMap(tectonicPlates) {
 
   // Create overlay object to hold our overlay layer
   var overlayMaps = {
-    // "Tectonic Plates": tectonicPlates,
-    "Tectonic Plates": tectonicPlates,
-    // "Earthquakes": earthquakes
+    "Tectonic Plates": Plates,
+    "Earthquakes": earthquakes
   };
 
   // Create our map, giving it the satalite and earthquakes layers to display on load
@@ -118,7 +118,7 @@ function createMap(tectonicPlates) {
       37.09, -95.71
     ],
     zoom: 3,
-    layers: [Esri_WorldImagery, tectonicPlates]
+    layers: [Esri_WorldImagery, earthquakes]
   });
 
   /*Legend specific*/
@@ -150,16 +150,13 @@ legend.addTo(myMap);
 }
 
 
+var Plates = new L.LayerGroup();
 
-
-
-
-
-
-
-
-
-
-        
-
+d3.json(tectonicPlates).then(function(data) {
+  L.geoJson(data, {
+    color: "orange",
+    weight: 2
+  }).addTo(Plates);
+  Plates.addTo(myMap);
+});
 
